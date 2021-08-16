@@ -38,7 +38,7 @@ class _MainPageState extends State<MainPage> {
     Games(),
     const Apps(),
     Movies(),
-    const Books()
+    Books()
   ];
 
   @override
