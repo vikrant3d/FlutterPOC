@@ -33,13 +33,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
-  List<Widget> listWidgets = [
-    const Home(),
-    Games(),
-    const Apps(),
-    Movies(),
-    Books()
-  ];
+  List<Widget> listWidgets = [Home(), Games(), MyApps(), Movies(), Books()];
 
   @override
   Widget build(BuildContext context) {
