@@ -37,6 +37,7 @@ dependencies:
   convex_bottom_bar: ^3.0.0
   http: ^0.13.3
   date_time_picker: ^2.1.0
+ 
   flutter_localizations: 
     sdk: flutter
     version: ^0.0.0

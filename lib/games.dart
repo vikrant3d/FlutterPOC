@@ -5,6 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
+import 'constant.dart';
+
 class Games extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -41,13 +43,12 @@ class MyCustomFormState extends State<MyCustomForm> {
   // and allows validation of the form.
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _autoValidate = false;
-  List genderModelList = [];
+  List materialList = [], partyList = [], siteList = [];
 
-  String materialNoController = "";
+  String materialNoController = "", partyNoController = "", siteController = "";
   late TextEditingController loadingController,
-      unloadingContainer,
+      unloadingController,
       vehicalNoController,
-      partyNoController,
       QuantityController,
       wbcNoController,
       dcNoController,
@@ -55,23 +56,15 @@ class MyCustomFormState extends State<MyCustomForm> {
       roalityController,
       roalityQtyController,
       driverNameController,
-      siteController,
       remarkController;
-  String _valueLoadingChanged = '';
-  String _valueLoadingToValidate = '';
-  String _valueLoadingSaved = '';
-  String _valueUnLoadingChanged = '';
-  String _valueUnLoadingToValidate = '';
-  String _valueUnLoadingSaved = '';
 
   @override
   void initState() {
     super.initState();
     Intl.defaultLocale = 'pt_BR';
     loadingController = TextEditingController(text: "");
-    unloadingContainer = TextEditingController(text: "");
+    unloadingController = TextEditingController(text: "");
     vehicalNoController = TextEditingController(text: "");
-    partyNoController = TextEditingController(text: "");
     QuantityController = TextEditingController(text: "");
     wbcNoController = TextEditingController(text: "");
     dcNoController = TextEditingController(text: "");
@@ -79,15 +72,23 @@ class MyCustomFormState extends State<MyCustomForm> {
     roalityController = TextEditingController(text: "");
     roalityQtyController = TextEditingController(text: "");
     driverNameController = TextEditingController(text: "");
-    siteController = TextEditingController(text: "");
     remarkController = TextEditingController(text: "");
 
-    http
-        .post(Uri.parse(
-            'https://kcqge9v510.execute-api.ap-southeast-1.amazonaws.com/dev/SHR/materialList'))
-        .then((response) {
+    http.post(Uri.parse(Constant.SERVER_URL + 'materialList')).then((response) {
       setState(() {
-        genderModelList = json.decode(response.body);
+        materialList = json.decode(response.body);
+      });
+    });
+
+    http.post(Uri.parse(Constant.SERVER_URL + 'partyList')).then((response) {
+      setState(() {
+        partyList = json.decode(response.body);
+      });
+    });
+
+    http.post(Uri.parse(Constant.SERVER_URL + 'siteList')).then((response) {
+      setState(() {
+        siteList = json.decode(response.body);
       });
     });
   }
@@ -120,7 +121,7 @@ class MyCustomFormState extends State<MyCustomForm> {
             labelText: 'Loading Date and Time',
           ),
           type: DateTimePickerType.dateTime,
-          dateMask: 'dd/MM/yyyy hh:mm a',
+          dateMask: Constant.DATE_TIME_FORMAT,
           controller: loadingController,
           //initialValue: _initialValue,
           firstDate: DateTime(2000),
@@ -129,12 +130,6 @@ class MyCustomFormState extends State<MyCustomForm> {
           dateLabelText: 'Date Time',
           use24HourFormat: false,
           locale: Locale('en', 'US'),
-          onChanged: (val) => setState(() => _valueLoadingChanged = val),
-          validator: (val) {
-            setState(() => _valueLoadingToValidate = val ?? '');
-            return null;
-          },
-          onSaved: (val) => setState(() => _valueLoadingSaved = val ?? ''),
         ),
         TextFormField(
           decoration: const InputDecoration(
@@ -150,18 +145,22 @@ class MyCustomFormState extends State<MyCustomForm> {
             return null;
           },
         ),
-        TextFormField(
+        DropdownButtonFormField(
           decoration: const InputDecoration(
             icon: Icon(Icons.person_add),
-            hintText: 'Enter Party Number',
-            labelText: 'Party Number',
+            hintText: 'Select Party',
+            labelText: 'Party',
           ),
-          controller: partyNoController,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'Please enter Party Number';
-            }
-            return null;
+          items: partyList.map((obj) {
+            return new DropdownMenuItem<String>(
+              value: obj,
+              child: new Text(obj, style: new TextStyle(color: Colors.black)),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              partyNoController = newValue!;
+            });
           },
         ),
         DropdownButtonFormField(
@@ -170,11 +169,10 @@ class MyCustomFormState extends State<MyCustomForm> {
             hintText: 'Select Material',
             labelText: 'Material',
           ),
-          items: genderModelList.map((map) {
+          items: materialList.map((obj) {
             return new DropdownMenuItem<String>(
-              value: map['key'],
-              child: new Text(map['value'],
-                  style: new TextStyle(color: Colors.black)),
+              value: obj,
+              child: new Text(obj, style: new TextStyle(color: Colors.black)),
             );
           }).toList(),
           onChanged: (String? newValue) {
@@ -246,8 +244,8 @@ class MyCustomFormState extends State<MyCustomForm> {
             labelText: 'Un-Loading Date and Time',
           ),
           type: DateTimePickerType.dateTime,
-          dateMask: 'dd/MM/yyyy hh:mm a',
-          controller: unloadingContainer,
+          dateMask: Constant.DATE_TIME_FORMAT,
+          controller: unloadingController,
           //initialValue: _initialValue,
           firstDate: DateTime(2000),
           lastDate: DateTime(2100),
@@ -255,12 +253,6 @@ class MyCustomFormState extends State<MyCustomForm> {
           dateLabelText: 'Un-Loading Date Time',
           use24HourFormat: false,
           locale: Locale('en', 'US'),
-          onChanged: (val) => setState(() => _valueUnLoadingChanged = val),
-          validator: (val) {
-            setState(() => _valueUnLoadingToValidate = val ?? '');
-            return null;
-          },
-          onSaved: (val) => setState(() => _valueUnLoadingSaved = val ?? ''),
         ),
         TextFormField(
           decoration: const InputDecoration(
@@ -304,18 +296,22 @@ class MyCustomFormState extends State<MyCustomForm> {
             return null;
           },
         ),
-        TextFormField(
+        DropdownButtonFormField(
           decoration: const InputDecoration(
-            icon: Icon(Icons.calendar_today),
-            hintText: 'Enter Site',
+            icon: Icon(Icons.person_add),
+            hintText: 'Select Site',
             labelText: 'Site',
           ),
-          controller: siteController,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'Please enter Site';
-            }
-            return null;
+          items: siteList.map((obj) {
+            return new DropdownMenuItem<String>(
+              value: obj,
+              child: new Text(obj, style: new TextStyle(color: Colors.black)),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            setState(() {
+              siteController = newValue!;
+            });
           },
         ),
         TextFormField(
@@ -345,12 +341,11 @@ class MyCustomFormState extends State<MyCustomForm> {
 
   void _validateInputs() {
     if (_formKey.currentState!.validate()) {
-      // If the form is valid, display a Snackbar.
       Map<String, dynamic> productMap = {
         "loadingTime": loadingController.text,
-        "unLoadingTime": unloadingContainer.text,
+        "unLoadingTime": unloadingController.text,
         "vehicalNo": vehicalNoController.text,
-        "partyNo": partyNoController.text,
+        "partyNo": partyNoController,
         "qtyNo": QuantityController.text,
         "wbcNo": wbcNoController.text,
         "dcNo": dcNoController.text,
@@ -358,15 +353,13 @@ class MyCustomFormState extends State<MyCustomForm> {
         "roality": roalityController.text,
         "roalityQty": roalityQtyController.text,
         "driverName": driverNameController.text,
-        "site": siteController.text,
+        "site": siteController,
         "remark": remarkController.text,
         "material": materialNoController
       };
 
       http
-          .post(
-              Uri.parse(
-                  'https://kcqge9v510.execute-api.ap-southeast-1.amazonaws.com/dev/SHR/vehicalEntry'),
+          .post(Uri.parse(Constant.SERVER_URL + 'vehicalEntry'),
               body: jsonEncode(productMap))
           .then((response) {
         showDialog(
